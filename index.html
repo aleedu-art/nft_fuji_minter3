@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Sentiment Analyzer - Chainlink Functions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            padding: 2rem;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 15px;
+            color: white;
+        }
+        
+        .upload-area {
+            border: 3px dashed #007bff;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+         
+        .upload-area:hover {
+            border-color: #0056b3;
+            background: #e9ecef;
+        }
+        
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .analysis-result {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 5px solid #007bff;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+        
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 0.25rem;
+            display: inline-block;
+        }
+        
+        .status-connected { background: #d1edff; color: #0969da; }
+        .status-disconnected { background: #ffebe9; color: #cf222e; }
+        .status-processing { background: #fff3cd; color: #856404; }
+        
+        .debug-section {
+            background: #1e1e1e;
+            color: #00ff00;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 2px solid #333;
+        }
+        
+        .btn-custom {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .contract-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .metadata-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 2px solid #dee2e6;
+        }
+        
+        .json-display {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1 class="mb-3">🎨 NFT Sentiment Analyzer</h1>
+            <p class="mb-0">Análise de Sentimentos Powered by Chainlink Functions & OpenAI</p>
+        </div>
+
+        <!-- Status Section -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="contract-info">
+                    <h6><i class="fas fa-wallet"></i> Status da Carteira</h6>
+                    <span id="walletStatus" class="status-badge status-disconnected">Desconectada</span>
+                    <div id="walletAddress" class="small mt-2"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="contract-info">
+                    <h6><i class="fas fa-link"></i> Contratos</h6>
+                    <div class="small">
+                         <!-- <strong>Chainlink:</strong> 0xa866557B00672D6659bD8AF5d09BbC30B1c2fBBE<br> -->
+                         <!-- <strong>Chainlink:</strong> 0xa866557B00672D6659bD8AF5d09BbC30B1c2fBBE<br> --> 
+                         <!-- <strong>Chainlink:</strong> 0xCDFcCf22b4Ac2d35aE71329b74A5cb2CC954f75d<br> -->    
+                        <strong>Chainlink:</strong> 0x78085e8054c8976646Dce8c5482160F884CBE197<br>
+
+                        <strong>NFT:</strong> 0xDb9Ac4b53e1A325D41Ed527895357614a3b2D03f
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="upload-area" id="uploadArea">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                    <h5>Arraste uma imagem aqui ou clique para selecionar</h5>
+                    <p class="text-muted">Formatos suportados: JPG, PNG, GIF (máx. 10MB)</p>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    <button class="btn btn-custom mt-2" onclick="document.getElementById('imageInput').click()">
+                        Selecionar Imagem
+                    </button>
+                </div>
+                
+                <div id="imagePreview" class="text-center"></div>
+                <div id="ipfsInfo" class="text-center mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-center my-4">
+            <button id="analyzeBtn" class="btn btn-custom btn-lg me-2" onclick="uploadAndAnalyzeImageWithChainlink()" disabled>
+                <i class="fas fa-brain"></i> Iniciar Análise de Sentimentos
+            </button>
+            <button id="generateMetadataBtn" class="btn btn-success btn-lg me-2" onclick="generateMetadata()" disabled>
+                <i class="fas fa-file-code"></i> Gerar Metadados
+            </button>
+            <button id="mintNftBtn" class="btn btn-warning btn-lg" onclick="mintNFTWithAnalysis()" disabled>
+                <i class="fas fa-coins"></i> Mint NFT
+            </button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <div id="loadingText" class="mt-3 h5">Processando...</div>
+        </div>
+
+        <!-- Debug Logs Section (Always Visible) -->
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6><i class="fas fa-terminal"></i> Console de Debug</h6>
+                <div>
+                    <button class="btn btn-sm btn-outline-light" onclick="clearDebugLogs()">Limpar Logs</button>
+                    <button class="btn btn-sm btn-outline-info" onclick="exportLogs()">Exportar Logs</button>
+                </div>
+            </div>
+            <div id="debugSection" class="debug-section">
+                <div id="debugLogs">Sistema inicializado. Aguardando ações...</div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" style="display: none;">
+            <h4 class="text-center mb-4">📊 Resultados da Análise</h4>
+            <div id="analysisResults"></div>
+        </div>
+
+        <!-- Metadata Section -->
+        <div id="metadataSection" class="metadata-section" style="display: none;">
+            <h5><i class="fas fa-file-code"></i> Metadados NFT Gerados</h5>
+            <div id="metadataDisplay" class="json-display"></div>
+            <div class="mt-3">
+                <button class="btn btn-outline-primary" onclick="copyMetadata()">
+                    <i class="fas fa-copy"></i> Copiar Metadados
+                </button>
+                <button class="btn btn-outline-success" onclick="downloadMetadata()">
+                    <i class="fas fa-download"></i> Download JSON
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+
+    <script>
+        // Global variables
+        let provider;
+        let signer;
+        let chainlinkContract;
+        let nftContract;
+        let currentIPFSHash = null;
+        let currentImageFile = null;
+        let analysisRequestId = null;
+        let analysisData = null;
+        let generatedMetadata = null;
+
+        // Contract addresses - ATUALIZADO PARA O CONTRATO CORRETO
+        // const CHAINLINK_CONTRACT_ADDRESS = "0xa866557B00672D6659bD8AF5d09BbC30B1c2fBBE";
+        // const CHAINLINK_CONTRACT_ADDRESS = "0x96B7DD519fe214EAc91a84820F4C7c298f1688cD";
+        // const CHAINLINK_CONTRACT_ADDRESS = "0xCDFcCf22b4Ac2d35aE71329b74A5cb2CC954f75d";
+        const CHAINLINK_CONTRACT_ADDRESS = "0x78085e8054c8976646Dce8c5482160F884CBE197";
+        const NFT_CONTRACT_ADDRESS = "0xDb9Ac4b53e1A325D41Ed527895357614a3b2D03f";
+        const SUBSCRIPTION_ID = 15580;
+
+        // ABI correto para o contrato FunctionsConsumer (Hardhat)
+        const chainlinkABI = [
+            {
+                "inputs": [
+                    {"internalType": "string", "name": "source", "type": "string"},
+                    {"internalType": "uint8", "name": "secretsLocation", "type": "uint8"},
+                    {"internalType": "bytes", "name": "encryptedSecretsReference", "type": "bytes"},
+                    {"internalType": "string[]", "name": "args", "type": "string[]"},
+                    {"internalType": "bytes[]", "name": "bytesArgs", "type": "bytes[]"},
+                    {"internalType": "uint64", "name": "subscriptionId", "type": "uint64"},
+                    {"internalType": "uint32", "name": "callbackGasLimit", "type": "uint32"}
+                ],
+                "name": "sendRequest",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "s_lastResponse",
+                "outputs": [{"internalType": "bytes", "name": "", "type": "bytes"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "s_lastError",
+                "outputs": [{"internalType": "bytes", "name": "", "type": "bytes"}],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "s_lastRequestId",
+                "outputs": [{"internalType": "bytes32", "name": "", "type": "bytes32"}],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // ABI simplificado para o contrato NFT
+        const nftABI = [
+            {
+                "inputs": [
+                    {"internalType": "address", "name": "to", "type": "address"},
+                    {"internalType": "string", "name": "uri", "type": "string"},
+                    {"internalType": "string", "name": "ipfsImageHash", "type": "string"},
+                    {"internalType": "string", "name": "sentimentAnalysis", "type": "string"},
+                    {"internalType": "string", "name": "colorPsychology", "type": "string"},
+                    {"internalType": "string", "name": "symbolRelation", "type": "string"},
+                    {"internalType": "string", "name": "visualLanguage", "type": "string"},
+                    {"internalType": "string[]", "name": "keywords", "type": "string[]"}
+                ],
+                "name": "mintWithSentiment",
+                "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [{"internalType": "uint256", "name": "tokenId", "type": "uint256"}],
+                "name": "getSentimentData",
+                "outputs": [
+                    {
+                        "components": [
+                            {"internalType": "string", "name": "sentimentAnalysis", "type": "string"},
+                            {"internalType": "string", "name": "colorPsychology", "type": "string"},
+                            {"internalType": "string", "name": "symbolRelation", "type": "string"},
+                            {"internalType": "string", "name": "visualLanguage", "type": "string"},
+                            {"internalType": "string[]", "name": "keywords", "type": "string[]"},
+                            {"internalType": "string", "name": "ipfsImageHash", "type": "string"},
+                            {"internalType": "uint256", "name": "timestamp", "type": "uint256"}
+                        ],
+                        "internalType": "struct SentimentNFT.SentimentData",
+                        "name": "",
+                        "type": "tuple"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ];
+
+        // JavaScript source code que será usado pelo contrato
+        // REMOVIDO - O contrato já tem o JavaScript deployado!
+        // Vamos usar o JavaScript que já está no contrato 0xa866557B00672D6659bD8AF5d09BbC30B1c2fBBE
+        // Vamos usar o JavaScript que já está no contrato 0x96B7DD519fe214EAc91a84820F4C7c298f1688cD
+        // Vamos usar o JavaScript que já está no contrato 0xCDFcCf22b4Ac2d35aE71329b74A5cb2CC954f75d
+        // Vamos usar o JavaScript que já está no contrato 0x78085e8054c8976646Dce8c5482160F884CBE197   
+        
+        // Utility functions
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            console.log(logEntry);
+            
+            const debugLogs = document.getElementById('debugLogs');
+            debugLogs.innerHTML += logEntry + '<br>';
+            debugLogs.scrollTop = debugLogs.scrollHeight;
+        }
+
+        function showLoading(text = "Processando...") {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        function clearDebugLogs() {
+            document.getElementById('debugLogs').innerHTML = 'Debug logs limpos.';
+        }
+
+        function exportLogs() {
+            const logs = document.getElementById('debugLogs').innerHTML;
+            const blob = new Blob([logs.replace(/<br>/g, '\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nft-analyzer-logs-${new Date().toISOString().slice(0,19)}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize wallet and contracts
+        async function initializeProvider() {
+            try {
+                log('Verificando conexao com carteira...');
+                
+                if (typeof window.ethereum !== 'undefined') {
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    signer = provider.getSigner();
+                    
+                    const address = await signer.getAddress();
+                    log(`Carteira conectada: ${address}`);
+                    
+                    document.getElementById('walletStatus').textContent = 'Conectada';
+                    document.getElementById('walletStatus').className = 'status-badge status-connected';
+                    document.getElementById('walletAddress').textContent = address;
+                    
+                    // Initialize contracts
+                    chainlinkContract = new ethers.Contract(CHAINLINK_CONTRACT_ADDRESS, chainlinkABI, signer);
+                    nftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, nftABI, signer);
+                    
+                    log('Contratos inicializados com sucesso');
+                    log(`Chainlink Contract: ${CHAINLINK_CONTRACT_ADDRESS}`);
+                    log(`NFT Contract: ${NFT_CONTRACT_ADDRESS}`);
+                    return true;
+                } else {
+                    throw new Error('MetaMask nao encontrada');
+                }
+            } catch (error) {
+                log(`Erro ao conectar carteira: ${error.message}`);
+                return false;
+            }
+        }
+
+        // File upload handling
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+
+            uploadArea.addEventListener('click', () => imageInput.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            imageInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+        }
+
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor, selecione um arquivo de imagem.');
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) { // 10MB
+                alert('Arquivo muito grande. Máximo 10MB.');
+                return;
+            }
+
+            currentImageFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const preview = document.getElementById('imagePreview');
+                preview.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="Preview">`;
+                
+                document.getElementById('analyzeBtn').disabled = false;
+                log(`Imagem selecionada: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Upload to IPFS
+        async function uploadToIPFS(file) {
+            const endpoints = [
+                'https://nft-fuji-minter.onrender.com/upload',
+                'https://nft-fuji-minter.onrender.com/api/upload'
+            ];
+
+            for (const endpoint of endpoints) {
+                try {
+                    log(`Tentando endpoint: ${endpoint}`);
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const data = await response.json();
+                    log(`Upload IPFS bem-sucedido: ${data.IpfsHash}`);
+                    
+                    return data.IpfsHash;
+                } catch (error) {
+                    log(`Endpoint ${endpoint} falhou: ${error.message}`);
+                }
+            }
+            
+            throw new Error('Todos os endpoints de upload falharam');
+        }
+
+        // Main analysis function - CORRIGIDO PARA NÃO ENVIAR JAVASCRIPT SOURCE
+        async function uploadAndAnalyzeImageWithChainlink() {
+            if (!currentImageFile) {
+                alert('Selecione uma imagem primeiro');
+                return;
+            }
+
+            if (!chainlinkContract) {
+                alert('Conecte sua carteira primeiro');
+                return;
+            }
+
+            try {
+                showLoading('Fazendo upload para IPFS...');
+                log('Iniciando upload para IPFS...');
+
+                // Upload to IPFS
+                currentIPFSHash = await uploadToIPFS(currentImageFile);
+                
+                document.getElementById('ipfsInfo').innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Upload IPFS concluído!</strong><br>
+                        Hash: <code>${currentIPFSHash}</code>
+                    </div>
+                `;
+
+                showLoading('Executando análise via Chainlink Functions...');
+                log('Executando Chainlink Function...');
+
+                // O CONTRATO JÁ TEM O JAVASCRIPT DEPLOYADO!
+                // NÃO PRECISAMOS ENVIAR SOURCE CODE, APENAS OS ARGUMENTOS
+                
+/*
+    string calldata source,
+   * FunctionsRequest.Location secretsLocation,
+   * bytes calldata encryptedSecretsReference,
+   * string[] calldata args,
+   * bytes[] calldata bytesArgs,
+   * uint64 subscriptionId,
+   * uint32 callbackGasLimit
+*/
+
+//==========
+/*
+// Error: OpenAI API key not found in secrets
+const { buildDONHostedEncryptedSecretsReference } = require('@chainlink/functions-toolkit');
+const slotId = 0;
+const version = 1750898295;
+
+const encryptedSecretsReference = buildDONHostedEncryptedSecretsReference({ slotId, version });
+*/
+//=========
+
+
+
+
+                // Prepare Chainlink Functions request - SEM JAVASCRIPT SOURCE
+              const secretsLocation = 1; // DONHosted
+               // const secretsLocation = Location.DONHosted ;
+              //  const encryptedSecretsReference = "0x"; // Empty for DON hosted secrets
+                const encryptedSecretsReference = "0x00685c9677";
+                
+
+                const args = [currentIPFSHash];
+                const bytesArgs = [];
+                const callbackGasLimit = 300000;
+
+                // 20250624
+                // const sourceCode = `return Functions.encodeString('Olá, Chainlink!');`;
+                //   const sourceCode = "return Functions.encodeString('Hello World!');";
+                   const sourceCode = "return Functions.encodeString(JSON.stringify({ message: 'Hello World!' }));";
+
+           
+                //==================
+                //==================
+
+// TESTAR OPENAI_API_KEY OU OPENAI_KEY
+// if (!secrets.openaiKey) {
+
+const sourceCode2 = `
+console.log('=== INICIANDO ANALISE DE SENTIMENTOS NFT ===');
+const ipfsHash = args[0];
+console.log('IPFS Hash recebido:', ipfsHash);
+
+if (!secrets.openaiKey) {
+  console.log('ERRO: OpenAI API key nao encontrada');
+  throw Error('OpenAI API key not found in secrets');
+}
+
+try {
+  // 1. Construir URL da imagem IPFS
+  const imageUrl = \`https://gateway.pinata.cloud/ipfs/\${ipfsHash}\`;
+  console.log('URL da imagem:', imageUrl);
+
+  // 2. Prompt especializado para analise de sentimentos de NFTs
+  const prompt = \`Analise esta imagem de NFT e forneca uma analise detalhada de sentimentos e caracteristicas visuais.
+  Retorne APENAS um JSON valido no seguinte formato:
+  {
+    "sentiment": "positive|negative|neutral",
+    "confidence": 0.95,
+    "emotions": ["joy", "excitement", "curiosity"],
+    "visual_elements": {
+      "colors": ["vibrant blue", "warm orange"],
+      "style": "abstract|realistic|cartoon|digital_art",
+      "composition": "balanced|dynamic|chaotic|minimal"
+    },
+    "symbolism": "Brief description of symbolic meaning",
+    "market_appeal": "high|medium|low",
+    "keywords": ["futuristic", "energetic", "innovative"],
+    "nft_attributes": [
+      {"trait_type": "Mood", "value": "Optimistic"},
+      {"trait_type": "Energy", "value": "High"},
+      {"trait_type": "Rarity", "value": "Rare"}
+    ]
+  }\`;
+
+  // 3. Chamada para OpenAI Vision API
+  const openaiRequest = Functions.makeHttpRequest({
+    url: 'https://api.openai.com/v1/chat/completions',
+    method: 'POST',
+    headers: {
+      'Authorization': \`Bearer \${secrets.openaiKey}\`,
+      'Content-Type': 'application/json'
+    },
+    data: {
+      model: 'gpt-4-vision-preview',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: imageUrl, detail: 'high' } }
+          ]
+        }
+      ],
+      max_tokens: 1000,
+      temperature: 0.3
+    }
+  });
+
+  console.log('Enviando requisicao para OpenAI...');
+  const [openaiResponse] = await Promise.all([openaiRequest]);
+
+  console.log('Resposta OpenAI recebida');
+  console.log('Status:', openaiResponse.status);
+
+  if (openaiResponse.error) {
+    console.log('Erro na API OpenAI:', openaiResponse.error);
+    throw Error(\`OpenAI API error: \${openaiResponse.error}\`);
+  }
+
+  if (!openaiResponse.data || !openaiResponse.data.choices || !openaiResponse.data.choices[0]) {
+    console.log('Resposta invalida da OpenAI');
+    throw Error('Invalid OpenAI response structure');
+  }
+
+  const analysisText = openaiResponse.data.choices[0].message.content;
+  console.log('Analise recebida:', analysisText.substring(0, 200) + '...');
+
+  // 4. Validar e limpar JSON
+  let analysisJson;
+  try {
+    // Remover possiveis caracteres extras antes/depois do JSON
+    const cleanText = analysisText.trim();
+    const jsonStart = cleanText.indexOf('{');
+    const jsonEnd = cleanText.lastIndexOf('}') + 1;
+    const jsonString = cleanText.substring(jsonStart, jsonEnd);
+
+    analysisJson = JSON.parse(jsonString);
+    console.log('JSON parseado com sucesso');
+  } catch (parseError) {
+    console.log('Erro ao parsear JSON:', parseError.message);
+    // Fallback com dados basicos
+    analysisJson = {
+      sentiment: 'neutral',
+      confidence: 0.5,
+      emotions: ['unknown'],
+      visual_elements: {
+        colors: ['mixed'],
+        style: 'digital_art',
+        composition: 'balanced'
+      },
+      symbolism: 'Analysis pending',
+      market_appeal: 'medium',
+      keywords: ['nft', 'digital'],
+      nft_attributes: [
+        {trait_type: 'Status', value: 'Analyzed'}
+      ]
+    };
+  }
+
+  // 5. Adicionar metadados tecnicos
+  const finalResult = {
+    ...analysisJson,
+    metadata: {
+      ipfs_hash: ipfsHash,
+      analysis_timestamp: Math.floor(Date.now() / 1000),
+      model_used: 'gpt-4-vision-preview',
+      chainlink_request: true
+    }
+  };
+
+  console.log('Analise completa finalizada');
+  const resultString = JSON.stringify(finalResult);
+  console.log('Resultado final (primeiros 300 chars):', resultString.substring(0, 300));
+
+  return Functions.encodeString(resultString);
+
+} catch (error) {
+  console.log('ERRO na analise:', error.message);
+
+  // Retornar erro estruturado
+  const errorResult = {
+    error: true,
+    message: error.message,
+    ipfs_hash: ipfsHash,
+    timestamp: Math.floor(Date.now() / 1000)
+  };
+
+  return Functions.encodeString(JSON.stringify(errorResult));
+}
+`;
+
+
+                //==================
+                //==================                
+
+/*
+
+= partametros
+   x  @param source JavaScript source code
+   x  @param secretsLocation Location of secrets (only Location.Remote & Location.DONHosted are supported)
+   x  @param encryptedSecretsReference Reference pointing to encrypted secrets
+   x  @param args String arguments passed into the source code and accessible via the global variable `args`
+   x  @param bytesArgs Bytes arguments passed into the source code and accessible via the global variable `bytesArgs` as hex strings
+   x  @param subscriptionId Subscription ID used to pay for request (FunctionsConsumer contract address must first be added to the subscription)
+   x  @param callbackGasLimit Maximum amount of gas used to call the inherited `handleOracleFulfillment` method
+*/
+
+                log(`Chamando sendRequest com IPFS Hash: ${currentIPFSHash}`);
+                log(`Usando contrato: ${CHAINLINK_CONTRACT_ADDRESS}`);
+                log(`IMPORTANTE: Usando JavaScript já deployado no contrato`);
+                
+                log(`source: ${source}`);
+                log(`Secrets location: ${secretsLocation}`);
+                log(`encryptedSecretsReference: ${encryptedSecretsReference}`);
+                log(`args: ${args}`);
+                log(`bytesArgs: ${bytesArgs}`);
+               
+                log(`subscriptionId: ${subscriptionId}`);
+
+                log(`Callback gas limit: ${callbackGasLimit}`);
+
+                /*
+                // Send request to Chainlink Functions - SEM SOURCE CODE
+                const tx = await chainlinkContract.sendRequest(
+                    "", // JAVASCRIPT SOURCE VAZIO - O CONTRATO JÁ TEM O CÓDIGO
+                    secretsLocation,
+                    encryptedSecretsReference,
+                    args,
+                    bytesArgs,
+                    SUBSCRIPTION_ID,
+                    callbackGasLimit,
+                    {
+                        gasLimit: 5000000, // Reduzido
+                        gasPrice: 25000000000
+                    }
+                );
+*/
+
+                // Send request to Chainlink Functions - SEM SOURCE CODE
+                const tx = await chainlinkContract.sendRequest(
+                    sourceCode,  
+                    secretsLocation,
+                    encryptedSecretsReference,
+                    args,
+                    bytesArgs,
+                    SUBSCRIPTION_ID,
+                    callbackGasLimit,
+                    {
+                        gasLimit: 5000000, // Reduzido
+                        gasPrice: 25000000000
+                    }
+                );
+
+
+                log(`Transação enviada: ${tx.hash}`);
+                showLoading(`Transação enviada: ${tx.hash}. Aguardando confirmação...`);
+
+                const receipt = await tx.wait();
+                log(`Transação confirmada. Bloco: ${receipt.blockNumber}`);
+                log(`Gas usado: ${receipt.gasUsed.toString()}`);
+                
+                showLoading('Transação confirmada. Aguardando resultados da análise...');
+
+                // Poll for results
+                pollForResults();
+
+            } catch (error) {
+                log(`Erro na análise: ${error.message}`);
+                log(`Stack trace: ${error.stack}`);
+                hideLoading();
+                alert(`Erro: ${error.message}`);
+            }
+        }
+
+        // Poll for Chainlink Functions results
+        async function pollForResults() {
+            const maxAttempts = 60; // 5 minutes
+            let attempts = 0;
+
+            const pollInterval = setInterval(async () => {
+                attempts++;
+                log(`Verificando resultados... Tentativa ${attempts}/${maxAttempts}`);
+                
+                try {
+                    const response = await chainlinkContract.s_lastResponse();
+                    const error = await chainlinkContract.s_lastError();
+                    
+                    if (response && response !== '0x') {
+                        clearInterval(pollInterval);
+                        hideLoading();
+                        
+                        try {
+                            const responseString = ethers.utils.toUtf8String(response);
+                            log(`Resposta recebida: ${responseString.substring(0, 200)}...`);
+                            
+                            // Parse the JSON response from OpenAI
+                            analysisData = JSON.parse(responseString);
+                            
+                            log('Análise recebida com sucesso!');
+                            displayAnalysisResults(analysisData);
+                            
+                            // Enable metadata generation
+                            document.getElementById('generateMetadataBtn').disabled = false;
+                            
+                        } catch (parseError) {
+                            log(`Erro ao parsear resposta: ${parseError.message}`);
+                            document.getElementById('resultsSection').style.display = 'block';
+                            document.getElementById('analysisResults').innerHTML = `
+                                <div class="alert alert-warning">
+                                    <h6>Resposta recebida (formato bruto):</h6>
+                                    <pre>${ethers.utils.toUtf8String(response)}</pre>
+                                </div>
+                            `;
+                        }
+                    } else if (error && error !== '0x') {
+                        clearInterval(pollInterval);
+                        hideLoading();
+                        
+                        const errorString = ethers.utils.toUtf8String(error);
+                        log(`Erro na execução: ${errorString}`);
+                        alert(`Erro na análise: ${errorString}`);
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        hideLoading();
+                        log('Timeout aguardando resultados');
+                        alert('Timeout aguardando resultados. Tente novamente.');
+                    }
+                    
+                } catch (error) {
+                    log(`Erro ao verificar resultados: ${error.message}`);
+                }
+            }, 5000); // Check every 5 seconds
+        }
+
+        // Display analysis results - ADAPTADO PARA O FORMATO DO CONTRATO
+        function displayAnalysisResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            const analysisResults = document.getElementById('analysisResults');
+            
+            if (data.error) {
+                analysisResults.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>Erro na Análise:</h6>
+                        <p>${data.message}</p>
+                    </div>
+                `;
+            } else {
+                // Adaptar para o formato retornado pelo contrato
+                analysisResults.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="analysis-result">
+                                <h6><i class="fas fa-heart"></i> Análise de Sentimentos</h6>
+                                <p>${data.sentiment_analysis || 'Análise não disponível'}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="analysis-result">
+                                <h6><i class="fas fa-palette"></i> Psicologia das Cores</h6>
+                                <p>${data.color_psychology || 'Análise não disponível'}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="analysis-result">
+                                <h6><i class="fas fa-eye"></i> Linguagem Visual</h6>
+                                <p>${data.visual_language || 'Análise não disponível'}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="analysis-result">
+                                <h6><i class="fas fa-gem"></i> Atributos</h6>
+                                ${data.attributes ? data.attributes.map(attr => 
+                                    `<span class="badge bg-primary me-1">${attr.trait_type}: ${attr.value}</span>`
+                                ).join('') : 'Atributos não disponíveis'}
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="analysis-result">
+                                <h6><i class="fas fa-link"></i> Relação Simbólica</h6>
+                                <p>${data.symbol_relation || 'Análise não disponível'}</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="analysis-result">
+                                <h6><i class="fas fa-tags"></i> Palavras-chave</h6>
+                                <p>${data.keywords ? data.keywords.join(', ') : 'Palavras-chave não disponíveis'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            resultsSection.style.display = 'block';
+        }
+
+        // Generate metadata - ADAPTADO PARA O FORMATO DO CONTRATO
+        function generateMetadata() {
+            if (!analysisData || !currentIPFSHash) {
+                alert('Execute a análise primeiro');
+                return;
+            }
+
+            log('Gerando metadados NFT...');
+
+            const metadata = {
+                name: `Sentiment NFT #${Date.now()}`,
+                description: `NFT com análise de sentimentos powered by Chainlink Functions e OpenAI. ${analysisData.sentiment_analysis || 'Análise de sentimentos completa'}`,
+                image: `https://gateway.pinata.cloud/ipfs/${currentIPFSHash}`,
+                external_url: "https://chainlink.com",
+                attributes: analysisData.attributes || [
+                    {
+                        trait_type: "Status",
+                        value: "Analyzed"
+                    }
+                ],
+                sentiment_analysis: {
+                    sentiment_analysis: analysisData.sentiment_analysis,
+                    color_psychology: analysisData.color_psychology,
+                    symbol_relation: analysisData.symbol_relation,
+                    visual_language: analysisData.visual_language,
+                    keywords: analysisData.keywords,
+                    analysis_timestamp: Math.floor(Date.now() / 1000)
+                }
+            };
+
+            generatedMetadata = metadata;
+
+            // Display metadata
+            document.getElementById('metadataDisplay').textContent = JSON.stringify(metadata, null, 2);
+            document.getElementById('metadataSection').style.display = 'block';
+            document.getElementById('mintNftBtn').disabled = false;
+
+            log('Metadados gerados com sucesso!');
+        }
+
+        // Copy metadata to clipboard
+        function copyMetadata() {
+            if (!generatedMetadata) return;
+            
+            navigator.clipboard.writeText(JSON.stringify(generatedMetadata, null, 2))
+                .then(() => {
+                    alert('Metadados copiados para a área de transferência!');
+                    log('Metadados copiados para clipboard');
+                })
+                .catch(err => {
+                    log(`Erro ao copiar: ${err.message}`);
+                });
+        }
+
+        // Download metadata as JSON file
+        function downloadMetadata() {
+            if (!generatedMetadata) return;
+            
+            const blob = new Blob([JSON.stringify(generatedMetadata, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nft-metadata-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            log('Metadados baixados como arquivo JSON');
+        }
+
+        // Mint NFT with analysis data - ADAPTADO PARA O FORMATO DO CONTRATO
+        async function mintNFTWithAnalysis() {
+            if (!analysisData || !generatedMetadata || !nftContract) {
+                alert('Complete a análise e gere os metadados primeiro');
+                return;
+            }
+
+            try {
+                showLoading('Fazendo mint do NFT...');
+                log('Iniciando mint do NFT com dados de sentimento...');
+
+                const userAddress = await signer.getAddress();
+                
+                // Upload metadata to IPFS
+                const metadataBlob = new Blob([JSON.stringify(generatedMetadata, null, 2)], { type: 'application/json' });
+                const metadataFile = new File([metadataBlob], 'metadata.json', { type: 'application/json' });
+                
+                log('Fazendo upload dos metadados para IPFS...');
+                const metadataHash = await uploadToIPFS(metadataFile);
+                const metadataURI = `https://gateway.pinata.cloud/ipfs/${metadataHash}`;
+                
+                log(`Metadados uploadados: ${metadataURI}`);
+
+                // Prepare data for contract - ADAPTADO PARA O FORMATO DO CONTRATO
+                const sentimentAnalysis = analysisData.sentiment_analysis || 'Análise de sentimentos';
+                const colorPsychology = analysisData.color_psychology || 'Psicologia das cores';
+                const symbolRelation = analysisData.symbol_relation || 'Relação simbólica';
+                const visualLanguage = analysisData.visual_language || 'Linguagem visual';
+                const keywords = analysisData.keywords || ['nft', 'sentiment', 'analysis'];
+
+                log('Chamando mintWithSentiment...');
+
+                // Call mint function
+                const tx = await nftContract.mintWithSentiment(
+                    userAddress,
+                    metadataURI,
+                    currentIPFSHash,
+                    sentimentAnalysis,
+                    colorPsychology,
+                    symbolRelation,
+                    visualLanguage,
+                    keywords,
+                    {
+                        gasLimit: 5000000,
+                        gasPrice: 25000000000
+                    }
+                );
+
+                log(`Transação de mint enviada: ${tx.hash}`);
+                showLoading(`Mint em andamento: ${tx.hash}. Aguardando confirmação...`);
+
+                const receipt = await tx.wait();
+                log(`NFT mintado com sucesso! Bloco: ${receipt.blockNumber}`);
+                
+                hideLoading();
+                
+                // Extract token ID from events
+                const mintEvent = receipt.events?.find(e => e.event === 'NFTMinted');
+                const tokenId = mintEvent?.args?.tokenId?.toString();
+                
+                alert(`NFT mintado com sucesso! ${tokenId ? `Token ID: ${tokenId}` : ''}`);
+                log(`Token ID: ${tokenId || 'N/A'}`);
+
+            } catch (error) {
+                log(`Erro no mint: ${error.message}`);
+                hideLoading();
+                alert(`Erro no mint: ${error.message}`);
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM Content Loaded. Inicializando...');
+            log(`Usando contrato Chainlink: ${CHAINLINK_CONTRACT_ADDRESS}`);
+            log(`Usando contrato NFT: ${NFT_CONTRACT_ADDRESS}`);
+            
+            setupFileUpload();
+            
+            // Auto-initialize if MetaMask is available
+            if (typeof window.ethereum !== 'undefined') {
+                initializeProvider();
+            } else {
+                log('MetaMask não detectado');
+            }
+        });
+    </script>
+</body>
+</html>
+
